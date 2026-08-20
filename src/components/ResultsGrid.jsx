@@ -4,6 +4,11 @@ import Heatmap2D from "./Heatmap2D";
 import FocusPanel from "./FocusPanel";
 import { computeMaeCm, computeRmseCm } from "../lib/stats";
 
+const STAGE_LABEL = {
+  loading: "Loading weights",
+  running: "Running inference",
+};
+
 const MODEL_META = {
   unet: { label: "U-Net Baseline" },
   cnn: { label: "CNN Dense" },
@@ -11,7 +16,7 @@ const MODEL_META = {
   convlstm: { label: "ConvLSTM" },
 };
 
-function ModelCard({ label, isTruth, state, grid, error, regionImage, groundTruthGrid, progress, onClick, active }) {
+function ModelCard({ label, isTruth, state, grid, error, regionImage, groundTruthGrid, progress, stage, onClick, active }) {
   const maeCm = grid && groundTruthGrid ? computeMaeCm(grid, groundTruthGrid) : null;
 
   const percent =
@@ -27,7 +32,11 @@ function ModelCard({ label, isTruth, state, grid, error, regionImage, groundTrut
         {grid ? (
           <Heatmap2D grid={grid} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
         ) : state === "loading" || state === "queued" ? (
-          <div className="w-full h-full bg-surface-container-highest/50 shimmer" />
+          <div className="w-full h-full bg-surface-container-highest/50 shimmer flex items-center justify-center">
+            <span className="font-label-mono text-label-mono uppercase tracking-widest text-white/50 text-[10px]">
+              {state === "queued" ? "Queued" : STAGE_LABEL[stage] || "Working"}
+            </span>
+          </div>
         ) : state === "error" ? (
           <div className="w-full h-full flex items-center justify-center px-2">
             <span className="text-error text-[10px] text-center">{error || "Error"}</span>
@@ -84,6 +93,8 @@ function PredictionBox({
   groundTruthGrid,
   horizonYears,
   progress,
+  stage,
+  elapsedYears,
   onClick,
 }) {
   const maeCm = grid && groundTruthGrid ? computeMaeCm(grid, groundTruthGrid) : null;
@@ -102,7 +113,11 @@ function PredictionBox({
         {grid ? (
           <Heatmap2D grid={grid} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
         ) : state === "loading" || state === "queued" ? (
-          <div className="w-full h-full bg-surface-container-highest/50 shimmer" />
+          <div className="w-full h-full bg-surface-container-highest/50 shimmer flex items-center justify-center">
+            <span className="font-label-mono text-label-mono uppercase tracking-widest text-white/50 text-[10px]">
+              {state === "queued" ? "Queued" : STAGE_LABEL[stage] || "Working"}
+            </span>
+          </div>
         ) : state === "error" ? (
           <div className="w-full h-full flex items-center justify-center px-2">
             <span className="text-error text-[10px] text-center">{error || "Error"}</span>
@@ -137,7 +152,9 @@ function PredictionBox({
 
         {isTruth ? (
           <p className="font-body-sm text-body-sm text-on-surface-variant group-hover:text-on-surface transition-colors">
-            Ground truth erosion simulation • T + {horizonYears} years
+            {state === "loading" && elapsedYears != null
+              ? `Simulating • ${elapsedYears} / ${horizonYears} years`
+              : `Ground truth erosion simulation • T + ${horizonYears} years`}
           </p>
         ) : (
           <p className="font-body-sm text-body-sm text-on-surface-variant group-hover:text-on-surface transition-colors">
@@ -164,6 +181,7 @@ function ResultsGrid({ regionName, coords, models, landlab, horizonYears, region
       grid: landlab.grid,
       error: landlab.error,
       progress: landlab.progress,
+      elapsedYears: landlab.elapsedYears,
     },
     ...Object.entries(MODEL_META).map(([key, meta]) => ({
       key,
@@ -172,6 +190,7 @@ function ResultsGrid({ regionName, coords, models, landlab, horizonYears, region
       state: models[key]?.state,
       grid: models[key]?.grid,
       error: models[key]?.error,
+      stage: models[key]?.stage,
     })),
   ];
 
@@ -241,6 +260,8 @@ function ResultsGrid({ regionName, coords, models, landlab, horizonYears, region
                     groundTruthGrid={landlab.grid}
                     horizonYears={horizonYears}
                     progress={item.progress}
+                    stage={item.stage}
+                    elapsedYears={item.elapsedYears}
                     onClick={() => handleFocus(item.key)}
                   />
                 ))}
@@ -265,6 +286,8 @@ function ResultsGrid({ regionName, coords, models, landlab, horizonYears, region
                       error={focusedItem.error}
                       progress={focusedItem.progress}
                       horizonYears={horizonYears}
+                      elapsedYears={focusedItem.elapsedYears}
+                      stageLabel={focusedItem.isTruth ? null : STAGE_LABEL[focusedItem.stage]}
                       regionImage={regionImage}
                     />
                   </div>
@@ -300,6 +323,7 @@ function ResultsGrid({ regionName, coords, models, landlab, horizonYears, region
                                 groundTruthGrid={landlab.grid}
                                 horizonYears={horizonYears}
                                 progress={item.progress}
+                                stage={item.stage}
                                 onClick={() => handleFocus(item.key)}
                               />
                             </motion.div>

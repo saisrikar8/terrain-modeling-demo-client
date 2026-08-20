@@ -1,12 +1,11 @@
 import PRESET_PATCHES from "../presets";
-import REGION_IMAGES from "../lib/regionImages";
 
 function PatchPicker({ onSelect }) {
   return (
     <div className="min-h-screen flex flex-col bg-background text-on-background font-body-md antialiased selection:bg-primary-container selection:text-on-primary-container relative">
       <div className="fixed inset-0 z-[-1] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-surface-container-high/40 via-background to-background" />
 
-      <main className="flex-1 pt-16 pb-margin-lg px-margin-sm md:px-margin-md max-w-7xl mx-auto w-full flex flex-col">
+      <main className="flex-1 pt-16 pb-margin-lg px-margin-sm md:px-margin-md max-w-5xl mx-auto w-full flex flex-col">
         <header className="mb-margin-lg">
           <h1 className="font-headline-xl text-headline-xl text-white mb-3 drop-shadow-md">
             Select a terrain region to begin simulation.
@@ -18,9 +17,8 @@ function PatchPicker({ onSelect }) {
           </p>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter flex-1">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-gutter">
           {PRESET_PATCHES.map((p) => {
-            const meta = REGION_IMAGES[p.id] || {};
             return (
               <button
                 key={p.id}
@@ -30,7 +28,7 @@ function PatchPicker({ onSelect }) {
                 <div
                   className="absolute inset-0 w-full h-full z-0 transition-transform duration-700 group-hover:scale-105"
                   style={{
-                    backgroundImage: `url('${meta.img}')`,
+                    backgroundImage: `url('${p.image}')`,
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                   }}
@@ -44,6 +42,9 @@ function PatchPicker({ onSelect }) {
                   <h2 className="font-headline-lg text-headline-lg text-white mb-1">{p.region}</h2>
                   <p className="font-body-sm text-body-sm text-white/70 group-hover:text-white transition-colors">
                     {p.description}
+                  </p>
+                  <p className="font-label-mono text-label-mono text-white/35 mt-2 text-[10px]">
+                    N {p.coords[0].toFixed(3)} / W {Math.abs(p.coords[1]).toFixed(3)} · photo: {p.credit}
                   </p>
                 </div>
               </button>

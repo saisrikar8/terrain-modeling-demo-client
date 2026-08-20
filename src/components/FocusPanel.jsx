@@ -11,6 +11,8 @@ function FocusPanel({
   error,
   progress,
   horizonYears,
+  elapsedYears,
+  stageLabel,
   regionImage,
 }) {
   const [zoom, setZoom] = useState(1);
@@ -103,7 +105,7 @@ function FocusPanel({
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
             <SpinnerIcon className="w-5 h-5 text-white/40 animate-spin" />
             <span className="font-label-mono text-label-mono uppercase tracking-widest text-white/40">
-              {state === "queued" ? "Queued" : "Simulating"}
+              {state === "queued" ? "Queued" : stageLabel || "Simulating"}
             </span>
           </div>
         )}
@@ -131,7 +133,11 @@ function FocusPanel({
                 )}
               </div>
             </div>
-            <span className="text-white/50 text-xs">T + {horizonYears} YEARS</span>
+            <span className="text-white/50 text-xs font-mono-nums">
+              {state === "loading" && elapsedYears != null
+                ? `${elapsedYears} / ${horizonYears} YEARS`
+                : `T + ${horizonYears} YEARS`}
+            </span>
           </div>
         </div>
       )}

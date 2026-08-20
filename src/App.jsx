@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import PatchPicker from "./components/PatchPicker";
 import ParamControls from "./components/ParamControls";
 import ResultsGrid from "./components/ResultsGrid";
-import REGION_IMAGES from "./lib/regionImages";
 import { API_WS } from "./lib/api";
 
 const MODEL_NAMES = ["unet", "cnn", "vit", "convlstm"];
@@ -43,7 +42,12 @@ function App() {
       } catch {
         return;
       }
-      if (msg.model) {
+      if (msg.type === "model_status") {
+        setModelResults((prev) => ({
+          ...prev,
+          [msg.model]: { state: "loading", stage: msg.stage },
+        }));
+      } else if (msg.model) {
         setModelResults((prev) => ({
           ...prev,
           [msg.model]: msg.error
@@ -81,7 +85,12 @@ function App() {
       if (msg.type === "queued") {
         setLandlab({ state: "queued" });
       } else if (msg.type === "progress") {
-        setLandlab({ state: "loading", progress: msg.percent, grid: msg.elevation_m });
+        setLandlab({
+          state: "loading",
+          progress: msg.percent,
+          elapsedYears: msg.elapsed_years,
+          grid: msg.change_m,
+        });
       } else if (msg.type === "simulate_result") {
         setLandlab({ state: "done", grid: msg.change_m });
       } else if (msg.type === "rate_limited" || msg.type === "error") {
@@ -126,7 +135,7 @@ function App() {
             models={modelResults}
             landlab={landlab}
             horizonYears={horizonYears}
-            regionImage={REGION_IMAGES[patch.id]?.img}
+            regionImage={patch.image}
           />
         </div>
       </main>

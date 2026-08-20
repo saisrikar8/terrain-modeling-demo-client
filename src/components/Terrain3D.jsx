@@ -2,13 +2,13 @@ import { useMemo } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
-import { divergingColor, maxAbsOf } from "../lib/colors";
+import { divergingColor, colorScaleOf } from "../lib/colors";
 
 function buildGeometry(grid) {
   const size = grid.length;
   const geometry = new THREE.PlaneGeometry(10, 10, size - 1, size - 1);
   const pos = geometry.attributes.position;
-  const maxAbs = maxAbsOf(grid);
+  const maxAbs = colorScaleOf(grid);
   const colors = new Float32Array(pos.count * 3);
 
   let maxMag = 0;

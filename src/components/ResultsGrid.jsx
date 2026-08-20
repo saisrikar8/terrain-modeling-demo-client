@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Heatmap2D from "./Heatmap2D";
 import FocusPanel from "./FocusPanel";
-import { computeMSE, computeErrorPercent } from "../lib/stats";
+import { computeMaeCm, computeRmseCm } from "../lib/stats";
 
 const MODEL_META = {
   unet: { label: "U-Net Baseline" },
@@ -12,8 +12,7 @@ const MODEL_META = {
 };
 
 function ModelCard({ label, isTruth, state, grid, error, regionImage, groundTruthGrid, progress, onClick, active }) {
-  const mse = grid && groundTruthGrid ? computeMSE(grid, groundTruthGrid) : null;
-  const errPct = grid && groundTruthGrid ? computeErrorPercent(grid, groundTruthGrid) : null;
+  const maeCm = grid && groundTruthGrid ? computeMaeCm(grid, groundTruthGrid) : null;
 
   const percent =
     progress != null
@@ -24,9 +23,9 @@ function ModelCard({ label, isTruth, state, grid, error, regionImage, groundTrut
 
   return (
     <div onClick={onClick} className="glass-panel card-hover rounded-xl flex flex-col w-full h-full min-h-0 cursor-pointer overflow-hidden group border border-white/5 active:scale-[0.98]">
-      <div className="relative w-full h-28 overflow-hidden bg-black shrink-0">
+      <div className="relative w-full h-36 overflow-hidden bg-black shrink-0">
         {grid ? (
-          <Heatmap2D grid={grid} className="w-full h-full object-cover opacity-90 transition-transform duration-700 group-hover:scale-110" />
+          <Heatmap2D grid={grid} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
         ) : state === "loading" || state === "queued" ? (
           <div className="w-full h-full bg-surface-container-highest/50 shimmer" />
         ) : state === "error" ? (
@@ -44,7 +43,9 @@ function ModelCard({ label, isTruth, state, grid, error, regionImage, groundTrut
             <span className="font-label-mono text-label-mono text-white/40 text-[10px]">AWAITING RUN</span>
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-surface-dim/90 via-surface-dim/40 to-transparent pointer-events-none" />
+        {!grid && (
+          <div className="absolute inset-0 bg-gradient-to-t from-surface-dim/90 via-surface-dim/40 to-transparent pointer-events-none" />
+        )}
       </div>
 
       <div className="shrink-0 z-10 p-2">
@@ -65,8 +66,7 @@ function ModelCard({ label, isTruth, state, grid, error, regionImage, groundTrut
 
         {!isTruth && (
           <p className="font-body-sm text-body-sm text-on-surface-variant group-hover:text-on-surface transition-colors leading-4">
-            {mse != null ? `MSE ${mse.toFixed(3)}` : "MSE —"}
-            {errPct != null ? ` • ERR ${errPct.toFixed(1)}%` : ""}
+            {maeCm != null ? `MAE ${maeCm.toFixed(3)} cm` : "MAE —"}
           </p>
         )}
       </div>
@@ -86,8 +86,8 @@ function PredictionBox({
   progress,
   onClick,
 }) {
-  const mse = grid && groundTruthGrid ? computeMSE(grid, groundTruthGrid) : null;
-  const errPct = grid && groundTruthGrid ? computeErrorPercent(grid, groundTruthGrid) : null;
+  const maeCm = grid && groundTruthGrid ? computeMaeCm(grid, groundTruthGrid) : null;
+  const rmseCm = grid && groundTruthGrid ? computeRmseCm(grid, groundTruthGrid) : null;
 
   const percent =
     progress != null
@@ -97,10 +97,10 @@ function PredictionBox({
         : 0;
 
   return (
-    <div onClick={onClick} className="glass-panel card-hover rounded-xl flex flex-col aspect-square w-[min(32%,22vw,40vh)] min-w-[220px] min-h-0 mb-[1.7%] cursor-pointer overflow-hidden group border border-white/5 active:scale-[0.98]">
+    <div onClick={onClick} className="glass-panel card-hover rounded-xl flex flex-col aspect-square w-[min(36%,27vw,46vh)] min-w-[260px] min-h-0 mb-[1.7%] cursor-pointer overflow-hidden group border border-white/5 active:scale-[0.98]">
       <div className="relative w-full flex-1 min-h-0 overflow-hidden bg-black">
         {grid ? (
-          <Heatmap2D grid={grid} className="w-full h-full object-cover opacity-90 transition-transform duration-700 group-hover:scale-110" />
+          <Heatmap2D grid={grid} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
         ) : state === "loading" || state === "queued" ? (
           <div className="w-full h-full bg-surface-container-highest/50 shimmer" />
         ) : state === "error" ? (
@@ -118,7 +118,9 @@ function PredictionBox({
             <span className="font-label-mono text-label-mono text-white/40 text-[10px]">AWAITING RUN</span>
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-surface-dim/90 via-surface-dim/40 to-transparent pointer-events-none" />
+        {!grid && (
+          <div className="absolute inset-0 bg-gradient-to-t from-surface-dim/90 via-surface-dim/40 to-transparent pointer-events-none" />
+        )}
       </div>
 
       <div className="shrink-0 z-10 p-4">
@@ -139,8 +141,8 @@ function PredictionBox({
           </p>
         ) : (
           <p className="font-body-sm text-body-sm text-on-surface-variant group-hover:text-on-surface transition-colors">
-            {mse != null ? `MSE ${mse.toFixed(3)}` : "MSE —"}
-            {errPct != null ? ` • ERR ${errPct.toFixed(1)}%` : ""}
+            {maeCm != null ? `MAE ${maeCm.toFixed(3)} cm` : "MAE —"}
+            {rmseCm != null ? ` • RMSE ${rmseCm.toFixed(3)} cm` : ""}
           </p>
         )}
       </div>

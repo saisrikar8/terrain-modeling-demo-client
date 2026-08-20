@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, Suspense, lazy } from "react";
 import Heatmap2D from "./Heatmap2D";
 import { SpinnerIcon } from "../lib/icons";
+
+const Terrain3D = lazy(() => import("./Terrain3D"));
 
 function FocusPanel({
   hero,
@@ -12,6 +14,7 @@ function FocusPanel({
   regionImage,
 }) {
   const [zoom, setZoom] = useState(1);
+  const [mode, setMode] = useState("2d");
   const hasGrid = Boolean(grid?.length);
 
   const percent =
@@ -24,40 +27,72 @@ function FocusPanel({
   return (
     <div className="rounded-lg glass-panel relative overflow-hidden flex flex-col w-full h-full">
       <div className="absolute top-2.5 right-2.5 z-20 flex space-x-1.5">
-        <button
-          type="button"
-          onClick={() => setZoom((z) => Math.min(2.5, z + 0.25))}
-          className="w-6 h-6 rounded bg-black/50 border border-white/20 flex items-center justify-center text-white/70 hover:text-white hover:bg-black/70 transition-all"
-        >
-          <span className="material-symbols-outlined text-[14px]">zoom_in</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setZoom((z) => Math.max(1, z - 0.25))}
-          className="w-6 h-6 rounded bg-black/50 border border-white/20 flex items-center justify-center text-white/70 hover:text-white hover:bg-black/70 transition-all"
-        >
-          <span className="material-symbols-outlined text-[14px]">zoom_out</span>
-        </button>
+        {hasGrid && (
+          <button
+            type="button"
+            onClick={() => setMode((m) => (m === "2d" ? "3d" : "2d"))}
+            className="h-6 px-2 rounded bg-black/50 border border-white/20 flex items-center justify-center gap-1 text-white/70 hover:text-white hover:bg-black/70 transition-all"
+          >
+            <span className="material-symbols-outlined text-[14px]">
+              {mode === "2d" ? "view_in_ar" : "grid_view"}
+            </span>
+            <span className="text-[10px] font-label-mono uppercase tracking-wider">
+              {mode === "2d" ? "3D" : "2D"}
+            </span>
+          </button>
+        )}
+        {mode === "2d" && (
+          <>
+            <button
+              type="button"
+              onClick={() => setZoom((z) => Math.min(2.5, z + 0.25))}
+              className="w-6 h-6 rounded bg-black/50 border border-white/20 flex items-center justify-center text-white/70 hover:text-white hover:bg-black/70 transition-all"
+            >
+              <span className="material-symbols-outlined text-[14px]">zoom_in</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setZoom((z) => Math.max(1, z - 0.25))}
+              className="w-6 h-6 rounded bg-black/50 border border-white/20 flex items-center justify-center text-white/70 hover:text-white hover:bg-black/70 transition-all"
+            >
+              <span className="material-symbols-outlined text-[14px]">zoom_out</span>
+            </button>
+          </>
+        )}
       </div>
 
       <div className="flex-1 relative w-full min-h-0 bg-black overflow-hidden">
-        <div className="absolute inset-0">
-          <img
-            src={regionImage}
-            alt=""
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-black/20" />
-        </div>
+        {!hasGrid && (
+          <div className="absolute inset-0">
+            <img
+              src={regionImage}
+              alt=""
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black/20" />
+          </div>
+        )}
 
-        {hasGrid && (
+        {hasGrid && mode === "2d" && (
           <div className="absolute inset-0 overflow-auto">
             <Heatmap2D
               grid={grid}
-              className="w-full h-full transition-transform duration-300 origin-center opacity-90"
+              className="w-full h-full transition-transform duration-300 origin-center"
               style={{ transform: `scale(${zoom})` }}
             />
           </div>
+        )}
+
+        {hasGrid && mode === "3d" && (
+          <Suspense
+            fallback={
+              <div className="absolute inset-0 flex items-center justify-center">
+                <SpinnerIcon className="w-5 h-5 text-white/40 animate-spin" />
+              </div>
+            }
+          >
+            <Terrain3D grid={grid} className="absolute inset-0" />
+          </Suspense>
         )}
 
         {!hasGrid && (state === "loading" || state === "queued") && (

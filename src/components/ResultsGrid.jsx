@@ -111,7 +111,7 @@ function PredictionBox({
         : 0;
 
   return (
-    <div onClick={onClick} className="glass-panel card-hover rounded-xl flex flex-col w-full h-full min-h-0 cursor-pointer overflow-hidden group border border-white/5 active:scale-[0.98]">
+    <div onClick={onClick} className="glass-panel card-hover rounded-xl flex flex-col basis-[calc((100%-2rem)/3)] max-w-[calc((100%-2rem)/3)] h-[calc((100%-1rem)/2)] min-h-0 cursor-pointer overflow-hidden group border border-white/5 active:scale-[0.98]">
       <div className="relative w-full flex-1 min-h-0 overflow-hidden bg-black">
         {grid ? (
           <Heatmap2D grid={grid} scale={scale} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
@@ -138,7 +138,7 @@ function PredictionBox({
         )}
       </div>
 
-      <div className="shrink-0 z-10 p-4">
+      <div className="shrink-0 z-10 px-3.5 py-2.5">
         <div className="flex justify-between items-start mb-1">
           <h4 className="font-semibold text-white text-[17px] leading-6 truncate">{label}</h4>
           {isTruth ? (
@@ -151,19 +151,19 @@ function PredictionBox({
         </div>
 
         {isTruth ? (
-          <p className="text-[13px] tnum text-white/70 group-hover:text-white transition-colors">
+          <p className="text-[12px] tnum text-white/70 group-hover:text-white transition-colors whitespace-nowrap">
             {state === "loading" && elapsedYears != null
-              ? `Simulating • ${elapsedYears} / ${horizonYears} years`
-              : `Landlab physics simulation • T + ${horizonYears} years`}
+              ? `Simulating · ${elapsedYears} / ${horizonYears} yr`
+              : `Landlab physics · T + ${horizonYears} years`}
           </p>
         ) : (
-          <p className="text-[13px] tnum text-white/70 group-hover:text-white transition-colors">
-            {maeCm != null ? `MAE ${maeCm.toFixed(3)} cm` : "MAE —"}
+          <p className="text-[12px] tnum text-white/70 group-hover:text-white transition-colors whitespace-nowrap">
+            {maeCm != null ? `MAE ${maeCm.toFixed(3)}` : "MAE —"}
             {rmseCm != null ? ` · RMSE ${rmseCm.toFixed(3)} cm` : ""}
           </p>
         )}
         {!isTruth && (
-          <p className="text-[13px] tnum text-white/55 group-hover:text-white/80 transition-colors">
+          <p className="text-[12px] tnum text-white/55 group-hover:text-white/80 transition-colors whitespace-nowrap">
             {r2 != null ? `R² ${r2.toFixed(3)}` : "R² —"}
           </p>
         )}
@@ -265,7 +265,7 @@ function ResultsGrid({ regionName, coords, models, landlab, horizonYears, region
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.35, ease: "easeInOut" }}
             >
-              <div className="grid grid-cols-3 gap-4 w-full h-full">
+              <div className="flex flex-wrap justify-center content-center gap-4 w-full h-full">
                 {allItems.map((item) => (
                   <PredictionBox
                     key={item.key}

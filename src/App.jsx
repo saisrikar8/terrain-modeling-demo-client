@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import PatchPicker from "./components/PatchPicker";
 import ParamControls from "./components/ParamControls";
 import ResultsGrid from "./components/ResultsGrid";
-import { API_WS } from "./lib/api";
+import { API_WS, fetchPatchDefaults } from "./lib/api";
 
 const MODEL_NAMES = ["unet", "cnn", "vit", "convlstm"];
 
@@ -15,6 +15,7 @@ function App() {
   const [modelResults, setModelResults] = useState(emptyModelState());
   const [landlab, setLandlab] = useState({ state: "idle" });
   const [horizonYears, setHorizonYears] = useState(1);
+  const [patchDefaults, setPatchDefaults] = useState(null);
 
   const socketsRef = useRef([]);
 
@@ -47,6 +48,24 @@ function App() {
   }, [patch]);
 
   useEffect(() => closeSockets, []);
+
+  useEffect(() => {
+    if (!patch) return;
+    let cancelled = false;
+    setPatchDefaults(null);
+    fetchPatchDefaults(patch.id)
+      .then((d) => {
+        if (cancelled) return;
+        setPatchDefaults(d);
+        setHorizonYears(d.horizon_years);
+      })
+      .catch(() => {
+        if (!cancelled) setPatchDefaults({});
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [patch]);
 
   function runPrediction(params) {
     closeSockets();
@@ -152,7 +171,16 @@ function App() {
           </button>
         </div>
 
-        <ParamControls disabled={running} onRun={runPrediction} />
+        {patchDefaults ? (
+          <ParamControls
+            key={patch.id}
+            defaults={patchDefaults}
+            disabled={running}
+            onRun={runPrediction}
+          />
+        ) : (
+          <p className="text-[13px] text-white/45">Loading patch parameters…</p>
+        )}
       </nav>
 
       <main className="flex-1 ml-[276px] h-full px-8 py-5 flex flex-col items-center overflow-hidden">

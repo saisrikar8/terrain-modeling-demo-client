@@ -1,11 +1,21 @@
 import { useState } from "react";
 
-const DEFAULTS = {
+const FALLBACK_DEFAULTS = {
   rainfallRegime: "ordinary",
   erodibility: 1e-5,
   diffusivity: 0.01,
   horizonYears: 1,
 };
+
+function resolveDefaults(defaults) {
+  if (!defaults) return FALLBACK_DEFAULTS;
+  return {
+    rainfallRegime: defaults.rainfall_regime ?? FALLBACK_DEFAULTS.rainfallRegime,
+    erodibility: defaults.erodibility ?? FALLBACK_DEFAULTS.erodibility,
+    diffusivity: defaults.diffusivity ?? FALLBACK_DEFAULTS.diffusivity,
+    horizonYears: defaults.horizon_years ?? FALLBACK_DEFAULTS.horizonYears,
+  };
+}
 
 const REGIMES = [
   { id: "ordinary", label: "Ordinary", detail: "Baseline CHIRPS rainfall" },
@@ -50,12 +60,13 @@ function Slider({ label, unit, display, value, min, max, step, onChange }) {
   );
 }
 
-function ParamControls({ disabled, onRun }) {
+function ParamControls({ disabled, defaults, onRun }) {
+  const base = resolveDefaults(defaults);
   const [activeTab, setActiveTab] = useState("rainfall");
-  const [rainfallRegime, setRainfallRegime] = useState(DEFAULTS.rainfallRegime);
-  const [erodibilityExp, setErodibilityExp] = useState(Math.log10(DEFAULTS.erodibility));
-  const [diffusivity, setDiffusivity] = useState(DEFAULTS.diffusivity);
-  const [horizonYears, setHorizonYears] = useState(DEFAULTS.horizonYears);
+  const [rainfallRegime, setRainfallRegime] = useState(base.rainfallRegime);
+  const [erodibilityExp, setErodibilityExp] = useState(Math.log10(base.erodibility));
+  const [diffusivity, setDiffusivity] = useState(base.diffusivity);
+  const [horizonYears, setHorizonYears] = useState(base.horizonYears);
 
   const erodibility = 10 ** erodibilityExp;
 
@@ -67,16 +78,16 @@ function ParamControls({ disabled, onRun }) {
   };
 
   const dirty =
-    rainfallRegime !== DEFAULTS.rainfallRegime ||
-    Math.abs(erodibility - DEFAULTS.erodibility) > 1e-9 ||
-    diffusivity !== DEFAULTS.diffusivity ||
-    horizonYears !== DEFAULTS.horizonYears;
+    rainfallRegime !== base.rainfallRegime ||
+    Math.abs(erodibility - base.erodibility) > 1e-9 ||
+    Math.abs(diffusivity - base.diffusivity) > 1e-9 ||
+    horizonYears !== base.horizonYears;
 
   function reset() {
-    setRainfallRegime(DEFAULTS.rainfallRegime);
-    setErodibilityExp(Math.log10(DEFAULTS.erodibility));
-    setDiffusivity(DEFAULTS.diffusivity);
-    setHorizonYears(DEFAULTS.horizonYears);
+    setRainfallRegime(base.rainfallRegime);
+    setErodibilityExp(Math.log10(base.erodibility));
+    setDiffusivity(base.diffusivity);
+    setHorizonYears(base.horizonYears);
   }
 
   return (
@@ -163,7 +174,7 @@ function ParamControls({ disabled, onRun }) {
               value={diffusivity}
               min={0.001}
               max={0.05}
-              step={0.001}
+              step={0.0001}
               onChange={(e) => setDiffusivity(parseFloat(e.target.value))}
             />
             <p className="text-[11px] text-white/55 leading-relaxed">
@@ -194,8 +205,9 @@ function ParamControls({ disabled, onRun }) {
         {dirty && (
           <div className="mt-4 pt-3 border-t border-white/10">
             <p className="text-[11px] text-white/55 leading-relaxed">
-              Parameters drive the Landlab ground truth. Model predictions come from
-              the scenario recorded in the patch, so they stay fixed.
+              These now differ from the scenario recorded in this patch. The Landlab
+              ground truth follows your values, but the models still predict the
+              recorded scenario — so the error metrics will drift.
             </p>
             <button
               type="button"

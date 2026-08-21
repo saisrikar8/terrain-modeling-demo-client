@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import Heatmap2D from "./Heatmap2D";
 import FocusPanel from "./FocusPanel";
 import Legend from "./Legend";
-import { computeMaeCm, computeRmseCm } from "../lib/stats";
+import { computeMaeCm, computeRmseCm, computeR2 } from "../lib/stats";
 import { sharedScaleOf } from "../lib/colors";
 
 const STAGE_LABEL = {
@@ -20,6 +20,7 @@ const MODEL_META = {
 
 function ModelCard({ label, isTruth, state, grid, error, regionImage, groundTruthGrid, progress, stage, scale, onClick, active }) {
   const maeCm = grid && groundTruthGrid ? computeMaeCm(grid, groundTruthGrid) : null;
+  const r2 = grid && groundTruthGrid ? computeR2(grid, groundTruthGrid) : null;
 
   const percent =
     progress != null
@@ -35,7 +36,7 @@ function ModelCard({ label, isTruth, state, grid, error, regionImage, groundTrut
           <Heatmap2D grid={grid} scale={scale} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
         ) : state === "loading" || state === "queued" ? (
           <div className="w-full h-full bg-surface-container-highest/50 shimmer flex items-center justify-center">
-            <span className="font-label-mono text-label-mono uppercase tracking-widest text-white/50 text-[10px]">
+            <span className="text-label-mono uppercase tracking-widest text-white/50 text-[10px]">
               {state === "queued" ? "Queued" : STAGE_LABEL[stage] || "Working"}
             </span>
           </div>
@@ -47,15 +48,12 @@ function ModelCard({ label, isTruth, state, grid, error, regionImage, groundTrut
           <img
             src={regionImage}
             alt=""
-            className="w-full h-full object-cover opacity-70 grayscale transition-all duration-700 group-hover:scale-110 group-hover:grayscale-0 group-hover:opacity-100"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <span className="font-label-mono text-label-mono text-white/40 text-[10px]">AWAITING RUN</span>
+            <span className="text-label-mono text-white/40 text-[10px]">AWAITING RUN</span>
           </div>
-        )}
-        {!grid && (
-          <div className="absolute inset-0 bg-gradient-to-t from-surface-dim/90 via-surface-dim/40 to-transparent pointer-events-none" />
         )}
       </div>
 
@@ -67,7 +65,7 @@ function ModelCard({ label, isTruth, state, grid, error, regionImage, groundTrut
               Active
             </span>
           ) : isTruth ? (
-            <span className="data-tag font-label-mono text-label-mono text-on-surface px-2 py-0.5 rounded shrink-0 ml-2">
+            <span className="data-tag text-label-mono text-on-surface px-2 py-0.5 rounded shrink-0 ml-2">
               {state === "idle" ? "—" : `${percent}%`}
             </span>
           ) : (
@@ -76,8 +74,9 @@ function ModelCard({ label, isTruth, state, grid, error, regionImage, groundTrut
         </div>
 
         {!isTruth && (
-          <p className="text-[12px] font-mono-nums text-white/70 group-hover:text-white transition-colors leading-4">
+          <p className="text-[12px] tnum text-white/70 group-hover:text-white transition-colors leading-4">
             {maeCm != null ? `MAE ${maeCm.toFixed(3)} cm` : "MAE —"}
+            {r2 != null ? ` · R² ${r2.toFixed(3)}` : ""}
           </p>
         )}
       </div>
@@ -102,6 +101,7 @@ function PredictionBox({
 }) {
   const maeCm = grid && groundTruthGrid ? computeMaeCm(grid, groundTruthGrid) : null;
   const rmseCm = grid && groundTruthGrid ? computeRmseCm(grid, groundTruthGrid) : null;
+  const r2 = grid && groundTruthGrid ? computeR2(grid, groundTruthGrid) : null;
 
   const percent =
     progress != null
@@ -117,7 +117,7 @@ function PredictionBox({
           <Heatmap2D grid={grid} scale={scale} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
         ) : state === "loading" || state === "queued" ? (
           <div className="w-full h-full bg-surface-container-highest/50 shimmer flex items-center justify-center">
-            <span className="font-label-mono text-label-mono uppercase tracking-widest text-white/50 text-[10px]">
+            <span className="text-label-mono uppercase tracking-widest text-white/50 text-[10px]">
               {state === "queued" ? "Queued" : STAGE_LABEL[stage] || "Working"}
             </span>
           </div>
@@ -129,15 +129,12 @@ function PredictionBox({
           <img
             src={regionImage}
             alt=""
-            className="w-full h-full object-cover opacity-70 grayscale transition-all duration-700 group-hover:scale-110 group-hover:grayscale-0 group-hover:opacity-100"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <span className="font-label-mono text-label-mono text-white/40 text-[10px]">AWAITING RUN</span>
+            <span className="text-label-mono text-white/40 text-[10px]">AWAITING RUN</span>
           </div>
-        )}
-        {!grid && (
-          <div className="absolute inset-0 bg-gradient-to-t from-surface-dim/90 via-surface-dim/40 to-transparent pointer-events-none" />
         )}
       </div>
 
@@ -145,7 +142,7 @@ function PredictionBox({
         <div className="flex justify-between items-start mb-1">
           <h4 className="font-semibold text-white text-[17px] leading-6 truncate">{label}</h4>
           {isTruth ? (
-            <span className="data-tag font-label-mono text-label-mono text-on-surface px-2 py-0.5 rounded shrink-0 ml-2">
+            <span className="data-tag text-label-mono text-on-surface px-2 py-0.5 rounded shrink-0 ml-2">
               {state === "idle" ? "—" : `${percent}%`}
             </span>
           ) : (
@@ -154,15 +151,20 @@ function PredictionBox({
         </div>
 
         {isTruth ? (
-          <p className="text-[13px] font-mono-nums text-white/70 group-hover:text-white transition-colors">
+          <p className="text-[13px] tnum text-white/70 group-hover:text-white transition-colors">
             {state === "loading" && elapsedYears != null
               ? `Simulating • ${elapsedYears} / ${horizonYears} years`
               : `Landlab physics simulation • T + ${horizonYears} years`}
           </p>
         ) : (
-          <p className="text-[13px] font-mono-nums text-white/70 group-hover:text-white transition-colors">
+          <p className="text-[13px] tnum text-white/70 group-hover:text-white transition-colors">
             {maeCm != null ? `MAE ${maeCm.toFixed(3)} cm` : "MAE —"}
-            {rmseCm != null ? ` • RMSE ${rmseCm.toFixed(3)} cm` : ""}
+            {rmseCm != null ? ` · RMSE ${rmseCm.toFixed(3)} cm` : ""}
+          </p>
+        )}
+        {!isTruth && (
+          <p className="text-[13px] tnum text-white/55 group-hover:text-white/80 transition-colors">
+            {r2 != null ? `R² ${r2.toFixed(3)}` : "R² —"}
           </p>
         )}
       </div>
@@ -223,7 +225,7 @@ function ResultsGrid({ regionName, coords, models, landlab, horizonYears, region
             <h2 className="text-[28px] leading-9 font-semibold text-white tracking-tight">{regionName}</h2>
             {coords && (
               <div className="flex items-center space-x-2 mt-1">
-                <span className="text-white/65 text-[13px] font-mono-nums">
+                <span className="text-white/65 text-[13px] tnum">
                   N {coords[0].toFixed(3)} / {coords[1] < 0 ? "W" : "E"} {formatCoord(coords[1])}
                 </span>
                 <span className="w-1 h-1 rounded-full bg-white/35" />
@@ -245,6 +247,12 @@ function ResultsGrid({ regionName, coords, models, landlab, horizonYears, region
 
         <div className="mt-3 pt-3 border-t border-white/10">
           <Legend scale={scale} ready={anyGrid} />
+          {anyGrid && (
+            <p className="text-[11px] text-white/35 mt-1.5">
+              MAE / RMSE / R² compare each model to the live Landlab run, which uses the
+              parameters set on the left — not the scenario recorded in the patch.
+            </p>
+          )}
         </div>
       </header>
 
@@ -304,7 +312,7 @@ function ResultsGrid({ regionName, coords, models, landlab, horizonYears, region
                   </div>
 
                   <div className="col-span-4 h-full flex flex-col gap-3">
-                    <h3 className="text-white/60 uppercase tracking-widest text-[11px] font-label-mono shrink-0">
+                    <h3 className="text-white/60 uppercase tracking-widest text-[11px] shrink-0">
                       Model Variants
                     </h3>
 

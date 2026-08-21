@@ -22,14 +22,14 @@ function Legend({ scale, ready }) {
       <div className="flex items-center gap-2.5">
         <span className="text-[13px] text-white/70 whitespace-nowrap">Elevation change</span>
         <div className="flex items-center gap-2">
-          <span className="font-mono-nums text-[12px] text-white/60 whitespace-nowrap">
+          <span className="tnum text-[12px] text-white/60 whitespace-nowrap">
             {ready ? `−${format(cm)} cm` : "−"}
           </span>
           <div
             className="h-2.5 w-48 rounded-full border border-white/15"
             style={{ background: GRADIENT }}
           />
-          <span className="font-mono-nums text-[12px] text-white/60 whitespace-nowrap">
+          <span className="tnum text-[12px] text-white/60 whitespace-nowrap">
             {ready ? `+${format(cm)} cm` : "+"}
           </span>
         </div>

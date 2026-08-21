@@ -39,7 +39,7 @@ function FocusPanel({
             <span className="material-symbols-outlined text-[14px]">
               {mode === "2d" ? "view_in_ar" : "grid_view"}
             </span>
-            <span className="text-[10px] font-label-mono uppercase tracking-wider">
+            <span className="text-[10px] uppercase tracking-wider">
               {mode === "2d" ? "3D" : "2D"}
             </span>
           </button>
@@ -106,7 +106,7 @@ function FocusPanel({
         {!hasGrid && (state === "loading" || state === "queued") && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
             <SpinnerIcon className="w-5 h-5 text-white/40 animate-spin" />
-            <span className="font-label-mono text-label-mono uppercase tracking-widest text-white/40">
+            <span className="text-label-mono uppercase tracking-widest text-white/40">
               {state === "queued" ? "Queued" : stageLabel || "Simulating"}
             </span>
           </div>
@@ -122,7 +122,7 @@ function FocusPanel({
       {hero && (
         <div className="h-9 border-t border-white/10 bg-black/40 backdrop-blur-md flex items-center px-4 shrink-0">
           <div className="flex-1 flex items-center space-x-3">
-            <span className="text-white/70 w-8 text-xs font-mono-nums">
+            <span className="text-white/70 w-8 text-xs tnum">
               {state === "idle" ? "—" : `${percent}%`}
             </span>
             <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
@@ -135,7 +135,7 @@ function FocusPanel({
                 )}
               </div>
             </div>
-            <span className="text-white/50 text-xs font-mono-nums">
+            <span className="text-white/50 text-xs tnum">
               {state === "loading" && elapsedYears != null
                 ? `${elapsedYears} / ${horizonYears} YEARS`
                 : `T + ${horizonYears} YEARS`}

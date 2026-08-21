@@ -2,15 +2,15 @@
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-mono: "Inter", ui-sans-serif, system-ui, sans-serif;
 
   --font-body-md: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-body-sm: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-headline-xl: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-headline-lg: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-headline-lg-mobile: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-label-mono: "JetBrains Mono", ui-monospace, monospace;
-  --font-label-code: "JetBrains Mono", ui-monospace, monospace;
+  --font-label-mono: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-label-code: "Inter", ui-sans-serif, system-ui, sans-serif;
 
   --color-background: #000000;
   --color-on-background: #e5e2e1;
@@ -125,8 +125,7 @@ body {
   font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
 }
 
-.font-mono-nums {
-  font-family: var(--font-mono);
+.tnum {
   font-variant-numeric: tabular-nums;
 }
 

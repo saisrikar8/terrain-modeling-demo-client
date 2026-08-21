@@ -43,7 +43,7 @@ function PatchPicker({ onSelect }) {
                   <p className="font-body-sm text-body-sm text-white/70 group-hover:text-white transition-colors">
                     {p.description}
                   </p>
-                  <p className="font-label-mono text-label-mono text-white/35 mt-2 text-[10px]">
+                  <p className="text-label-mono text-white/35 mt-2 text-[10px]">
                     N {p.coords[0].toFixed(3)} / W {Math.abs(p.coords[1]).toFixed(3)} · photo: {p.credit}
                   </p>
                 </div>

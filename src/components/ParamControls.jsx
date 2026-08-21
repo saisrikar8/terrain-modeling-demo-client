@@ -29,10 +29,10 @@ function Slider({ label, unit, display, value, min, max, step, onChange }) {
   return (
     <div>
       <div className="flex items-baseline justify-between mb-1.5">
-        <label className="font-label-mono text-label-mono uppercase tracking-wider text-white/60 text-[11px]">
+        <label className="text-label-mono uppercase tracking-wider text-white/60 text-[11px]">
           {label}
         </label>
-        <span className="font-mono-nums text-white text-[13px]">
+        <span className="tnum text-white text-[13px]">
           {display}
           <span className="text-white/40 ml-1">{unit}</span>
         </span>
@@ -102,7 +102,7 @@ function ParamControls({ disabled, onRun }) {
                   {tab.icon}
                 </span>
                 <span className="text-[13px] flex-1 text-left">{tab.label}</span>
-                <span className="font-mono-nums text-[11px] text-white/55">
+                <span className="tnum text-[11px] text-white/55">
                   {summary[tab.id]}
                 </span>
               </button>

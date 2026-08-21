@@ -29,10 +29,10 @@ function Slider({ label, unit, display, value, min, max, step, onChange }) {
   return (
     <div>
       <div className="flex items-baseline justify-between mb-1.5">
-        <label className="font-label-mono text-label-mono uppercase tracking-wider text-white/50 text-[10px]">
+        <label className="font-label-mono text-label-mono uppercase tracking-wider text-white/60 text-[11px]">
           {label}
         </label>
-        <span className="font-mono-nums text-white text-xs">
+        <span className="font-mono-nums text-white text-[13px]">
           {display}
           <span className="text-white/40 ml-1">{unit}</span>
         </span>
@@ -101,8 +101,8 @@ function ParamControls({ disabled, onRun }) {
                 >
                   {tab.icon}
                 </span>
-                <span className="text-xs flex-1 text-left">{tab.label}</span>
-                <span className="font-mono-nums text-[10px] text-white/40">
+                <span className="text-[13px] flex-1 text-left">{tab.label}</span>
+                <span className="font-mono-nums text-[11px] text-white/55">
                   {summary[tab.id]}
                 </span>
               </button>
@@ -127,8 +127,8 @@ function ParamControls({ disabled, onRun }) {
                       : "border-white/10 text-white/60 hover:border-white/20 hover:text-white"
                   }`}
                 >
-                  <div className="text-xs font-medium">{regime.label}</div>
-                  <div className="text-[10px] text-white/40 mt-0.5">{regime.detail}</div>
+                  <div className="text-[13px] font-medium">{regime.label}</div>
+                  <div className="text-[11px] text-white/55 mt-0.5">{regime.detail}</div>
                 </button>
               );
             })}
@@ -147,7 +147,7 @@ function ParamControls({ disabled, onRun }) {
               step={0.05}
               onChange={(e) => setErodibilityExp(parseFloat(e.target.value))}
             />
-            <p className="text-[10px] text-white/40 leading-snug">
+            <p className="text-[11px] text-white/55 leading-relaxed">
               Bedrock incision coefficient in the Fastscape eroder. Higher values cut
               channels faster.
             </p>
@@ -166,7 +166,7 @@ function ParamControls({ disabled, onRun }) {
               step={0.001}
               onChange={(e) => setDiffusivity(parseFloat(e.target.value))}
             />
-            <p className="text-[10px] text-white/40 leading-snug">
+            <p className="text-[11px] text-white/55 leading-relaxed">
               Linear diffusion rate for soil creep. Higher values smooth ridges and
               fill hollows.
             </p>
@@ -185,7 +185,7 @@ function ParamControls({ disabled, onRun }) {
               step={1}
               onChange={(e) => setHorizonYears(parseInt(e.target.value, 10))}
             />
-            <p className="text-[10px] text-white/40 leading-snug">
+            <p className="text-[11px] text-white/55 leading-relaxed">
               Total time evolved by the Landlab simulation, split across 12 substeps.
             </p>
           </div>
@@ -193,14 +193,14 @@ function ParamControls({ disabled, onRun }) {
 
         {dirty && (
           <div className="mt-4 pt-3 border-t border-white/10">
-            <p className="text-[10px] text-white/40 leading-snug">
+            <p className="text-[11px] text-white/55 leading-relaxed">
               Parameters drive the Landlab ground truth. Model predictions come from
               the scenario recorded in the patch, so they stay fixed.
             </p>
             <button
               type="button"
               onClick={reset}
-              className="mt-2 text-[10px] text-white/50 hover:text-white transition-colors"
+              className="mt-2 text-[11px] text-white/65 hover:text-white transition-colors underline underline-offset-2"
             >
               Reset to patch baseline
             </button>
@@ -213,7 +213,7 @@ function ParamControls({ disabled, onRun }) {
           type="button"
           disabled={disabled}
           onClick={() => onRun({ rainfallRegime, horizonYears, erodibility, diffusivity })}
-          className="w-full bg-white text-black text-xs font-medium py-2 rounded-lg hover:bg-white/90 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-white text-black text-[14px] font-semibold py-2.5 rounded-lg hover:bg-white/90 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <span className="material-symbols-outlined text-[16px]">play_arrow</span>
           <span>{disabled ? "Running…" : "Run"}</span>

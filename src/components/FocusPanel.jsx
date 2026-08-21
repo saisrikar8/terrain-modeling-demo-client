@@ -13,6 +13,7 @@ function FocusPanel({
   horizonYears,
   elapsedYears,
   stageLabel,
+  scale,
   regionImage,
 }) {
   const [zoom, setZoom] = useState(1);
@@ -79,6 +80,7 @@ function FocusPanel({
           <div className="absolute inset-0 overflow-auto">
             <Heatmap2D
               grid={grid}
+              scale={scale}
               className="w-full h-full transition-transform duration-300 origin-center"
               style={{ transform: `scale(${zoom})` }}
             />
@@ -93,7 +95,7 @@ function FocusPanel({
               </div>
             }
           >
-            <Terrain3D grid={grid} className="absolute inset-0" />
+            <Terrain3D grid={grid} scale={scale} className="absolute inset-0" />
           </Suspense>
         )}
 

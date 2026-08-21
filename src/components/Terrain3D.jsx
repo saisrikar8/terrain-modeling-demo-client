@@ -4,11 +4,11 @@ import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import { divergingColor, colorScaleOf } from "../lib/colors";
 
-function buildGeometry(grid) {
+function buildGeometry(grid, colorScale) {
   const size = grid.length;
   const geometry = new THREE.PlaneGeometry(10, 10, size - 1, size - 1);
   const pos = geometry.attributes.position;
-  const maxAbs = colorScaleOf(grid);
+  const maxAbs = colorScale || colorScaleOf(grid);
   const colors = new Float32Array(pos.count * 3);
 
   let maxMag = 0;
@@ -35,8 +35,8 @@ function buildGeometry(grid) {
   return geometry;
 }
 
-function Mesh({ grid }) {
-  const geometry = useMemo(() => buildGeometry(grid), [grid]);
+function Mesh({ grid, colorScale }) {
+  const geometry = useMemo(() => buildGeometry(grid, colorScale), [grid, colorScale]);
   return (
     <mesh geometry={geometry} rotation={[-Math.PI / 2.4, 0, 0]}>
       <meshStandardMaterial vertexColors flatShading roughness={0.85} />
@@ -44,13 +44,13 @@ function Mesh({ grid }) {
   );
 }
 
-function Terrain3D({ grid, className }) {
+function Terrain3D({ grid, scale, className }) {
   return (
     <div className={className}>
       <Canvas camera={{ position: [0, 6, 9], fov: 40 }} dpr={[1, 1.5]}>
         <ambientLight intensity={0.65} />
         <directionalLight position={[5, 8, 4]} intensity={1.1} />
-        <Mesh grid={grid} />
+        <Mesh grid={grid} colorScale={scale} />
         <OrbitControls enablePan={false} minDistance={4} maxDistance={16} />
       </Canvas>
     </div>

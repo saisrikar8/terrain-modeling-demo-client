@@ -16,14 +16,14 @@ function sampleBilinear(grid, gx, gy) {
   return top + (bottom - top) * ty;
 }
 
-function draw(canvas, grid) {
+function draw(canvas, grid, scale) {
   const size = grid.length;
   const out = size * UPSCALE;
   canvas.width = out;
   canvas.height = out;
   const ctx = canvas.getContext("2d");
   const img = ctx.createImageData(out, out);
-  const maxAbs = colorScaleOf(grid);
+  const maxAbs = scale || colorScaleOf(grid);
   for (let y = 0; y < out; y++) {
     const gy = (y + 0.5) / UPSCALE - 0.5;
     for (let x = 0; x < out; x++) {
@@ -39,12 +39,12 @@ function draw(canvas, grid) {
   ctx.putImageData(img, 0, 0);
 }
 
-function Heatmap2D({ grid, className, style }) {
+function Heatmap2D({ grid, scale, className, style }) {
   const canvasRef = useRef(null);
 
   useEffect(() => {
-    if (grid) draw(canvasRef.current, grid);
-  }, [grid]);
+    if (grid) draw(canvasRef.current, grid, scale);
+  }, [grid, scale]);
 
   return (
     <canvas

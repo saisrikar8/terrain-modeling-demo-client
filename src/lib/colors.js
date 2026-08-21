@@ -55,6 +55,16 @@ export function colorScaleOf(grid, percentile = 98) {
   return values[idx] || values[values.length - 1] || 0.001;
 }
 
+export function sharedScaleOf(grids) {
+  let max = 0;
+  for (const g of grids) {
+    if (!g?.length) continue;
+    const s = colorScaleOf(g);
+    if (s > max) max = s;
+  }
+  return max || 0.001;
+}
+
 export function maxAbsOf(grid) {
   let max = 0;
   for (const row of grid) {

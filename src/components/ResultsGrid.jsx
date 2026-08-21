@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import Heatmap2D from "./Heatmap2D";
 import FocusPanel from "./FocusPanel";
+import Legend from "./Legend";
 import { computeMaeCm, computeRmseCm } from "../lib/stats";
+import { sharedScaleOf } from "../lib/colors";
 
 const STAGE_LABEL = {
   loading: "Loading weights",
@@ -16,7 +18,7 @@ const MODEL_META = {
   convlstm: { label: "ConvLSTM" },
 };
 
-function ModelCard({ label, isTruth, state, grid, error, regionImage, groundTruthGrid, progress, stage, onClick, active }) {
+function ModelCard({ label, isTruth, state, grid, error, regionImage, groundTruthGrid, progress, stage, scale, onClick, active }) {
   const maeCm = grid && groundTruthGrid ? computeMaeCm(grid, groundTruthGrid) : null;
 
   const percent =
@@ -30,7 +32,7 @@ function ModelCard({ label, isTruth, state, grid, error, regionImage, groundTrut
     <div onClick={onClick} className="glass-panel card-hover rounded-xl flex flex-col w-full h-full min-h-0 cursor-pointer overflow-hidden group border border-white/5 active:scale-[0.98]">
       <div className="relative w-full h-36 overflow-hidden bg-black shrink-0">
         {grid ? (
-          <Heatmap2D grid={grid} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+          <Heatmap2D grid={grid} scale={scale} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
         ) : state === "loading" || state === "queued" ? (
           <div className="w-full h-full bg-surface-container-highest/50 shimmer flex items-center justify-center">
             <span className="font-label-mono text-label-mono uppercase tracking-widest text-white/50 text-[10px]">
@@ -59,7 +61,7 @@ function ModelCard({ label, isTruth, state, grid, error, regionImage, groundTrut
 
       <div className="shrink-0 z-10 p-2">
         <div className="flex justify-between items-start">
-          <h4 className="font-semibold text-white text-sm leading-5 truncate">{label}</h4>
+          <h4 className="font-semibold text-white text-[15px] leading-5 truncate">{label}</h4>
           {active ? (
             <span className="px-2 py-0.5 rounded bg-white text-black text-[10px] font-bold uppercase tracking-wider shrink-0 ml-2">
               Active
@@ -74,7 +76,7 @@ function ModelCard({ label, isTruth, state, grid, error, regionImage, groundTrut
         </div>
 
         {!isTruth && (
-          <p className="font-body-sm text-body-sm text-on-surface-variant group-hover:text-on-surface transition-colors leading-4">
+          <p className="text-[12px] font-mono-nums text-white/70 group-hover:text-white transition-colors leading-4">
             {maeCm != null ? `MAE ${maeCm.toFixed(3)} cm` : "MAE —"}
           </p>
         )}
@@ -95,6 +97,7 @@ function PredictionBox({
   progress,
   stage,
   elapsedYears,
+  scale,
   onClick,
 }) {
   const maeCm = grid && groundTruthGrid ? computeMaeCm(grid, groundTruthGrid) : null;
@@ -108,10 +111,10 @@ function PredictionBox({
         : 0;
 
   return (
-    <div onClick={onClick} className="glass-panel card-hover rounded-xl flex flex-col aspect-square w-[min(36%,27vw,46vh)] min-w-[260px] min-h-0 mb-[1.7%] cursor-pointer overflow-hidden group border border-white/5 active:scale-[0.98]">
+    <div onClick={onClick} className="glass-panel card-hover rounded-xl flex flex-col w-full h-full min-h-0 cursor-pointer overflow-hidden group border border-white/5 active:scale-[0.98]">
       <div className="relative w-full flex-1 min-h-0 overflow-hidden bg-black">
         {grid ? (
-          <Heatmap2D grid={grid} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+          <Heatmap2D grid={grid} scale={scale} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
         ) : state === "loading" || state === "queued" ? (
           <div className="w-full h-full bg-surface-container-highest/50 shimmer flex items-center justify-center">
             <span className="font-label-mono text-label-mono uppercase tracking-widest text-white/50 text-[10px]">
@@ -140,7 +143,7 @@ function PredictionBox({
 
       <div className="shrink-0 z-10 p-4">
         <div className="flex justify-between items-start mb-1">
-          <h4 className="font-semibold text-white text-base leading-6 truncate">{label}</h4>
+          <h4 className="font-semibold text-white text-[17px] leading-6 truncate">{label}</h4>
           {isTruth ? (
             <span className="data-tag font-label-mono text-label-mono text-on-surface px-2 py-0.5 rounded shrink-0 ml-2">
               {state === "idle" ? "—" : `${percent}%`}
@@ -151,13 +154,13 @@ function PredictionBox({
         </div>
 
         {isTruth ? (
-          <p className="font-body-sm text-body-sm text-on-surface-variant group-hover:text-on-surface transition-colors">
+          <p className="text-[13px] font-mono-nums text-white/70 group-hover:text-white transition-colors">
             {state === "loading" && elapsedYears != null
               ? `Simulating • ${elapsedYears} / ${horizonYears} years`
-              : `Ground truth erosion simulation • T + ${horizonYears} years`}
+              : `Landlab physics simulation • T + ${horizonYears} years`}
           </p>
         ) : (
-          <p className="font-body-sm text-body-sm text-on-surface-variant group-hover:text-on-surface transition-colors">
+          <p className="text-[13px] font-mono-nums text-white/70 group-hover:text-white transition-colors">
             {maeCm != null ? `MAE ${maeCm.toFixed(3)} cm` : "MAE —"}
             {rmseCm != null ? ` • RMSE ${rmseCm.toFixed(3)} cm` : ""}
           </p>
@@ -170,12 +173,12 @@ function PredictionBox({
 function ResultsGrid({ regionName, coords, models, landlab, horizonYears, regionImage }) {
   const [focused, setFocused] = useState(null);
 
-  const formatCoord = (v) => Math.abs(v).toFixed(1);
+  const formatCoord = (v) => Math.abs(v).toFixed(3);
 
   const allItems = [
     {
       key: "landlab",
-      label: "Ground Truth (Landlab)",
+      label: "Ground Truth",
       isTruth: true,
       state: landlab.state,
       grid: landlab.grid,
@@ -198,6 +201,9 @@ function ResultsGrid({ regionName, coords, models, landlab, horizonYears, region
     ? allItems.find((item) => item.key === focused)
     : null;
 
+  const scale = sharedScaleOf(allItems.map((item) => item.grid));
+  const anyGrid = allItems.some((item) => item.grid?.length);
+
   function handleFocus(key) {
     if (key === focused) return;
     setFocused(key);
@@ -211,43 +217,47 @@ function ResultsGrid({ regionName, coords, models, landlab, horizonYears, region
 
   return (
     <div className="flex-1 min-w-0 flex flex-col h-full">
-      <header className="mt-8 mb-3 flex justify-between items-end z-10 shrink-0">
-        <div>
-          <h2 className="text-[26px] leading-8 font-semibold text-white tracking-tight">{regionName}</h2>
-          {coords && (
-            <div className="flex items-center space-x-2 mt-0.5">
-              <span className="text-white/60 text-xs">
-                N {coords[0].toFixed(1)} / {coords[1] < 0 ? "W" : "E"} {formatCoord(coords[1])}
-              </span>
-              <span className="w-1 h-1 rounded-full bg-white/40" />
-              <span className="text-white/60 text-xs transition-all duration-300">{subtitle}</span>
-            </div>
+      <header className="mt-6 mb-3 z-10 shrink-0">
+        <div className="flex justify-between items-end">
+          <div>
+            <h2 className="text-[28px] leading-9 font-semibold text-white tracking-tight">{regionName}</h2>
+            {coords && (
+              <div className="flex items-center space-x-2 mt-1">
+                <span className="text-white/65 text-[13px] font-mono-nums">
+                  N {coords[0].toFixed(3)} / {coords[1] < 0 ? "W" : "E"} {formatCoord(coords[1])}
+                </span>
+                <span className="w-1 h-1 rounded-full bg-white/35" />
+                <span className="text-white/65 text-[13px] transition-all duration-300">{subtitle}</span>
+              </div>
+            )}
+          </div>
+
+          {focused && (
+            <button
+              type="button"
+              onClick={handleBack}
+              className="text-[13px] text-white/70 hover:text-primary transition-colors px-3 py-1.5 rounded-lg border border-white/15 hover:border-primary/50"
+            >
+              ← Back to all panels
+            </button>
           )}
         </div>
 
-        {focused && (
-          <button
-            type="button"
-            onClick={handleBack}
-            className="text-xs text-on-surface-variant hover:text-primary transition-colors"
-          >
-            ← Back to grid
-          </button>
-        )}
+        <div className="mt-3 pt-3 border-t border-white/10">
+          <Legend scale={scale} ready={anyGrid} />
+        </div>
       </header>
 
       <div className="flex-1 min-h-0 relative overflow-hidden">
-        <AnimatePresence initial={false} mode="wait">
           {!focused ? (
             <motion.div
               key="grid"
-              className="absolute inset-0 z-20 flex items-center justify-center"
+              className="absolute inset-0 z-20"
               initial={{ opacity: 0, x: -40 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -40 }}
               transition={{ duration: 0.35, ease: "easeInOut" }}
             >
-              <div className="flex flex-wrap justify-center content-center gap-x-[2%] w-[92%]">
+              <div className="grid grid-cols-3 gap-4 w-full h-full">
                 {allItems.map((item) => (
                   <PredictionBox
                     key={item.key}
@@ -262,6 +272,7 @@ function ResultsGrid({ regionName, coords, models, landlab, horizonYears, region
                     progress={item.progress}
                     stage={item.stage}
                     elapsedYears={item.elapsedYears}
+                    scale={scale}
                     onClick={() => handleFocus(item.key)}
                   />
                 ))}
@@ -273,7 +284,6 @@ function ResultsGrid({ regionName, coords, models, landlab, horizonYears, region
               className="absolute inset-0 z-20 h-full grid grid-cols-12 gap-3"
               initial={{ opacity: 0, x: 60 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 60 }}
               transition={{ duration: 0.35, ease: "easeInOut" }}
             >
               {focusedItem && (
@@ -288,12 +298,13 @@ function ResultsGrid({ regionName, coords, models, landlab, horizonYears, region
                       horizonYears={horizonYears}
                       elapsedYears={focusedItem.elapsedYears}
                       stageLabel={focusedItem.isTruth ? null : STAGE_LABEL[focusedItem.stage]}
+                      scale={scale}
                       regionImage={regionImage}
                     />
                   </div>
 
                   <div className="col-span-4 h-full flex flex-col gap-3">
-                    <h3 className="text-white/60 uppercase tracking-widest text-[10px] font-label-mono shrink-0">
+                    <h3 className="text-white/60 uppercase tracking-widest text-[11px] font-label-mono shrink-0">
                       Model Variants
                     </h3>
 
@@ -324,6 +335,7 @@ function ResultsGrid({ regionName, coords, models, landlab, horizonYears, region
                                 horizonYears={horizonYears}
                                 progress={item.progress}
                                 stage={item.stage}
+                                scale={scale}
                                 onClick={() => handleFocus(item.key)}
                               />
                             </motion.div>
@@ -335,7 +347,6 @@ function ResultsGrid({ regionName, coords, models, landlab, horizonYears, region
               )}
             </motion.div>
           )}
-        </AnimatePresence>
       </div>
     </div>
   );

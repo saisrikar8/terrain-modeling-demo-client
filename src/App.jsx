@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import PatchPicker from "./components/PatchPicker";
 import ParamControls from "./components/ParamControls";
 import ResultsGrid from "./components/ResultsGrid";
@@ -16,6 +16,22 @@ function App() {
   const [landlab, setLandlab] = useState({ state: "idle" });
   const [horizonYears, setHorizonYears] = useState(1);
 
+  const socketsRef = useRef([]);
+
+  function closeSockets() {
+    socketsRef.current.forEach((ws) => {
+      ws.onmessage = null;
+      ws.onerror = null;
+      ws.onclose = null;
+      try {
+        ws.close();
+      } catch {
+        /* already closed */
+      }
+    });
+    socketsRef.current = [];
+  }
+
   useEffect(() => {
     document.body.style.overflow = patch ? "hidden" : "";
     return () => {
@@ -23,7 +39,17 @@ function App() {
     };
   }, [patch]);
 
+  useEffect(() => {
+    closeSockets();
+    setModelResults(emptyModelState());
+    setLandlab({ state: "idle" });
+    setRunning(false);
+  }, [patch]);
+
+  useEffect(() => closeSockets, []);
+
   function runPrediction(params) {
+    closeSockets();
     setRunning(true);
     setHorizonYears(params.horizonYears);
     setModelResults(
@@ -32,6 +58,7 @@ function App() {
     setLandlab({ state: "queued" });
 
     const predictWs = new WebSocket(`${API_WS}/ws/predict`);
+    socketsRef.current.push(predictWs);
     predictWs.onopen = () => {
       predictWs.send(JSON.stringify({ patch_id: patch.id, models: MODEL_NAMES }));
     };
@@ -69,6 +96,7 @@ function App() {
     };
 
     const simWs = new WebSocket(`${API_WS}/ws/simulate`);
+    socketsRef.current.push(simWs);
     simWs.onopen = () => {
       simWs.send(
         JSON.stringify({
@@ -112,13 +140,13 @@ function App() {
     <div className="relative h-screen w-screen overflow-hidden flex bg-surface text-on-surface font-body-md selection:bg-white/20">
       <div className="fixed inset-0 z-[-1] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-surface-container-high/70 via-background to-background" />
 
-      <nav className="fixed left-0 top-0 bottom-0 w-[240px] z-40 flex flex-col p-4 glass-panel border-r border-white/10 h-full">
+      <nav className="fixed left-0 top-0 bottom-0 w-[276px] z-40 flex flex-col p-5 glass-panel border-r border-white/10 h-full">
         <div className="mb-5 flex flex-col">
-          <h1 className="text-base font-semibold text-white leading-tight">Simulation Parameters</h1>
+          <h1 className="text-[17px] font-semibold text-white leading-tight">Simulation Parameters</h1>
           <button
             type="button"
             onClick={() => setPatch(null)}
-            className="text-xs text-on-surface-variant hover:text-primary transition-colors mt-0.5 text-left"
+            className="text-[13px] text-white/60 hover:text-primary transition-colors mt-1 text-left"
           >
             ← Change region
           </button>
@@ -127,7 +155,7 @@ function App() {
         <ParamControls disabled={running} onRun={runPrediction} />
       </nav>
 
-      <main className="flex-1 ml-[240px] h-full p-6 flex flex-col items-center overflow-hidden">
+      <main className="flex-1 ml-[276px] h-full px-8 py-5 flex flex-col items-center overflow-hidden">
         <div className="w-full max-w-[1280px] h-full">
           <ResultsGrid
             regionName={patch.region}

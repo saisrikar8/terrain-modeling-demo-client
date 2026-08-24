@@ -64,16 +64,24 @@ function ModelCard({ label, isTruth, state, grid, error, regionImage, groundTrut
             <span className="px-2 py-0.5 rounded bg-white text-black text-[10px] font-bold uppercase tracking-wider shrink-0 ml-2">
               Active
             </span>
-          ) : isTruth ? (
-            <span className="data-tag text-label-mono text-on-surface px-2 py-0.5 rounded shrink-0 ml-2">
-              {state === "idle" ? "—" : `${percent}%`}
-            </span>
-          ) : (
+          ) : !isTruth ? (
             <span className="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors text-[16px]">open_in_new</span>
-          )}
+          ) : null}
         </div>
 
-        {!isTruth && (
+        {isTruth ? (
+          <div className="mt-1.5 flex items-center gap-2">
+            <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-white transition-[width] duration-300"
+                style={{ width: `${state === "idle" ? 0 : percent}%` }}
+              />
+            </div>
+            <span className="text-[10px] tnum text-white/45 shrink-0">
+              {state === "idle" ? "—" : `${percent}%`}
+            </span>
+          </div>
+        ) : (
           <p className="text-[12px] tnum text-white/70 group-hover:text-white transition-colors leading-4">
             {maeCm != null ? `MAE ${maeCm.toFixed(3)} cm` : "MAE —"}
             {r2 != null ? ` · R² ${r2.toFixed(3)}` : ""}
@@ -141,21 +149,30 @@ function PredictionBox({
       <div className="shrink-0 z-10 px-3.5 py-2.5">
         <div className="flex justify-between items-start mb-1">
           <h4 className="font-semibold text-white text-[17px] leading-6 truncate">{label}</h4>
-          {isTruth ? (
-            <span className="data-tag text-label-mono text-on-surface px-2 py-0.5 rounded shrink-0 ml-2">
-              {state === "idle" ? "—" : `${percent}%`}
-            </span>
-          ) : (
+          {!isTruth && (
             <span className="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors text-[16px]">open_in_new</span>
           )}
         </div>
 
         {isTruth ? (
-          <p className="text-[12px] tnum text-white/70 group-hover:text-white transition-colors whitespace-nowrap">
-            {state === "loading" && elapsedYears != null
-              ? `Simulating · ${elapsedYears} / ${horizonYears} yr`
-              : `Landlab physics · T + ${horizonYears} years`}
-          </p>
+          <>
+            <p className="text-[12px] tnum text-white/70 group-hover:text-white transition-colors whitespace-nowrap">
+              {state === "loading" && elapsedYears != null
+                ? `Simulating · ${elapsedYears} / ${horizonYears} yr`
+                : `Landlab physics · T + ${horizonYears} years`}
+            </p>
+            <div className="mt-1.5 flex items-center gap-2">
+              <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-white transition-[width] duration-300"
+                  style={{ width: `${state === "idle" ? 0 : percent}%` }}
+                />
+              </div>
+              <span className="text-[10px] tnum text-white/45 shrink-0">
+                {state === "idle" ? "—" : `${percent}%`}
+              </span>
+            </div>
+          </>
         ) : (
           <p className="text-[12px] tnum text-white/70 group-hover:text-white transition-colors whitespace-nowrap">
             {maeCm != null ? `MAE ${maeCm.toFixed(3)}` : "MAE —"}
@@ -296,7 +313,7 @@ function ResultsGrid({ regionName, coords, models, landlab, horizonYears, region
             >
               {focusedItem && (
                 <>
-                  <div className="col-span-8 row-span-1 h-full rounded-lg glass-panel relative overflow-hidden flex flex-col cursor-pointer">
+                  <div className="col-span-8 row-span-1 h-full min-h-0 rounded-lg glass-panel relative overflow-hidden flex flex-col cursor-pointer">
                     <FocusPanel
                       hero={focusedItem.isTruth}
                       state={focusedItem.state}
@@ -311,7 +328,7 @@ function ResultsGrid({ regionName, coords, models, landlab, horizonYears, region
                     />
                   </div>
 
-                  <div className="col-span-4 h-full flex flex-col gap-3">
+                  <div className="col-span-4 h-full min-h-0 flex flex-col gap-3">
                     <h3 className="text-white/60 uppercase tracking-widest text-[11px] shrink-0">
                       Model Variants
                     </h3>

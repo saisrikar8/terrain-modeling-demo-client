@@ -184,7 +184,7 @@ function App() {
       </nav>
 
       <main className="flex-1 ml-[276px] h-full px-8 py-5 flex flex-col items-center overflow-hidden">
-        <div className="w-full max-w-[1280px] h-full">
+        <div className="w-full max-w-[1280px] h-full min-h-0">
           <ResultsGrid
             regionName={patch.region}
             coords={patch.coords}
